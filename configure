@@ -2892,7 +2892,15 @@ ac_config_headers="$ac_config_headers config.h"
 
 
 
+
 $as_echo "#define CONFIG_PATH \"/usr/local/etc/dchat/dchat.conf\"" >>confdefs.h
+
+#AC_DEFINE([CONFIG_PATH], "$(sysconfdir)/dchat/dchat.conf", [Path to configuration diretory])
+#AC_DEFINE([TMP_PATH], "{$TMPDIR}", [Path to diretory for temporary files])
+
+$as_echo "#define TMP_PATH \"/tmp/\"" >>confdefs.h
+
+
 
 
 # Checks for programs.

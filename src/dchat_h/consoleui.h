@@ -9,6 +9,7 @@
 #define LOG_WARN LOG_WARNING
 
 int init_ui(dchat_conf_t* cnf);
+int init_socket(char* file);
 int ui_write(int fd, char* nickname, char* msg);
 void ui_log(int fd, int lf,const char* fmt, ...);
 void ui_log_errno(int fd, int lf, const char* fmt, ...);

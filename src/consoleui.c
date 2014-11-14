@@ -2,8 +2,12 @@
  *  
  */
 
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/un.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <stdarg.h>
 #include <string.h>
 #include <errno.h>
@@ -25,11 +29,57 @@ static const char* flty_[8] = {"emerg", "alert", "crit", "err", "warning", "noti
  */
 int
 init_ui(dchat_conf_t* cnf){
-    cnf->in_fd            = 0;    // use stdin as input source
+    /*cnf->in_fd            = 0;    // use stdin as input source
     cnf->out_fd           = 1;    // use stdout as output target
-    cnf->log_fd           = 1;    // use stdout as log target
+    cnf->log_fd           = 1;    // use stdout as log target*/
+    cnf->in_fd = 0;
+
+    if((cnf->out_fd = init_socket("dchat_out")) == -1)
+        return -1;
+
+    if((cnf->log_fd = init_socket("dchat_log")) == -1)
+        return -1;
 
     return 0;
+}
+
+int
+init_socket(char* file){
+    int len, sock, fd;
+    struct sockaddr_un server;
+
+    char path[strlen(TMP_PATH)+strlen(file)+1];
+
+    sprintf(path, "%s%s", TMP_PATH, file);
+
+    unlink(path);
+
+    sock = socket(PF_LOCAL, SOCK_STREAM, 0);
+    if(sock < 0){
+        perror("opening socket");
+        return -1;
+    }
+
+    server.sun_family = PF_LOCAL;
+    strcpy(server.sun_path, path);
+    if(bind(sock, (struct sockaddr *) &server, sizeof(struct sockaddr_un))){
+        perror("binding socket");
+        return -1;
+    }
+
+    printf("waiting %s\n", server.sun_path);
+    fflush(stdout);
+
+    if(listen(sock, 1)){
+        perror("listening socket");
+        return -1;
+    }
+    if((fd = accept(sock, 0, 0)) == -1){
+        perror("acepting socket");
+        return -1;
+    }
+
+    return fd;
 }
 
 /**
@@ -37,13 +87,11 @@ init_ui(dchat_conf_t* cnf){
  * @param fd File descriptor where the message will be written to
  * @nickname Nickname of the client from whom we received the message
  * @msg Text message to print
- * @return 0 on success, -1 in case of error
+ * @return number of of characters printed. Negative value if on output error occurs
 */
  int
  ui_write(int fd, char* nickname, char* msg){
-    dprintf(fd, "%s;%s\n", nickname, msg);
-
-    return 0;
+    return dprintf(fd, "%s;%s\n", nickname, msg);
  }
 
 

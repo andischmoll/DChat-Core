@@ -7,7 +7,13 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_CONFIG_SRCDIR([src/dchat.c])
 AC_CONFIG_HEADERS([config.h])
 
+
 AC_DEFINE([CONFIG_PATH], "/usr/local/etc/dchat/dchat.conf", [Path to configuration diretory])
+#AC_DEFINE([CONFIG_PATH], "$(sysconfdir)/dchat/dchat.conf", [Path to configuration diretory])
+#AC_DEFINE([TMP_PATH], "{$TMPDIR}", [Path to diretory for temporary files])
+AC_DEFINE([TMP_PATH], "/tmp/", [Path to diretory for temporary files])
+
+
 
 # Checks for programs.
 AC_PROG_CC
